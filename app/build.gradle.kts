@@ -86,4 +86,6 @@ dependencies {
     implementation ("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.3")
 
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+
+    implementation ("io.coil-kt:coil-compose:2.0.0")
 }

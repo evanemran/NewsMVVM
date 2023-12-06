@@ -19,14 +19,16 @@ class NewsViewModel @Inject constructor(
     var state by mutableStateOf(NewsState())
         private set
 
-    fun loadNewsData() {
+    var categoryState by mutableStateOf("business")
+
+    fun loadNewsData(category: String) {
         viewModelScope.launch {
             state =state.copy(
                 isLoading = true,
                 error = null
             )
 
-            when (val result = newsRepository.getNewsData("us","business","6600726d91554031a727674028102f84")) {
+            when (val result = newsRepository.getNewsData("us",category,"6600726d91554031a727674028102f84")) {
                 is Resource.Success -> {
                     state = state.copy(
                         newsInfo = result.data,

@@ -29,6 +29,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,25 +48,28 @@ import com.evanemran.newsmvvm.presentation.viewmodel.NewsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.runtime.remember
 import com.evanemran.newsmvvm.presentation.utils.getCategories
+import kotlin.random.Random
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel: NewsViewModel by viewModels()
+//    private var selectedButtonState: MutableState<String> = mutableStateOf("business")
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.loadNewsData()
+        viewModel.loadNewsData("general")
 
         setContent {
             NewsMVVMTheme {
                 val selectedButtonState = remember {
-                    mutableStateOf("business")
+                    mutableStateOf("general")
                 }
 
                 fun onButtonClick(value: String) {
                     selectedButtonState.value = value
+                    viewModel.loadNewsData(value)
                 }
 
                 Scaffold(
@@ -81,26 +85,31 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .background(Color.White),
-                                verticalArrangement = Arrangement.Center,
+                                verticalArrangement = Arrangement.Top,
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                LazyRow(modifier = Modifier.padding(8.dp) ,content = {
-                                    items(getCategories()) { category->
-                                        FilterButton(category, selectedButtonState.value, onClick = ::onButtonClick)
-                                    }
-                                })
-                                LazyColumn(content = {
-                                    viewModel.state.newsInfo?.articles?.let {
-                                        items(it.size) { newsData->
-                                            if (newsData<5 || newsData>15) {
-                                                NewsItem(article = it[newsData])
-                                            }
-                                            else {
-                                                NewsItemInLine(article = it[newsData])
+                                selectedButtonState.value.let {
+                                    LazyRow(modifier = Modifier.padding(8.dp) ,content = {
+                                        items(getCategories()) { category->
+                                            FilterButton(category, selectedButtonState.value, onClick = ::onButtonClick)
+                                        }
+                                    })
+                                    LazyColumn(content = {
+                                        viewModel.state.newsInfo?.articles?.let {
+                                            items(it.size) { newsData->
+                                                val random: Int = Random.nextInt(2) + 1
+                                                when(random) {
+                                                    1-> {
+                                                        NewsItem(article = it[newsData])
+                                                    }
+                                                    2-> {
+                                                        NewsItemInLine(article = it[newsData])
+                                                    }
+                                                }
                                             }
                                         }
-                                    }
-                                })
+                                    })
+                                }
                             }
                             if(viewModel.state.isLoading) {
                                 CircularProgressIndicator(

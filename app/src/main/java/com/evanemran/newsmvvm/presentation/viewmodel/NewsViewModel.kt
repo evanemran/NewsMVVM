@@ -19,8 +19,6 @@ class NewsViewModel @Inject constructor(
     var state by mutableStateOf(NewsState())
         private set
 
-    var categoryState by mutableStateOf("business")
-
     fun loadNewsData(category: String) {
         viewModelScope.launch {
             state =state.copy(

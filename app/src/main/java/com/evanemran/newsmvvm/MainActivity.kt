@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -47,6 +49,9 @@ import com.evanemran.newsmvvm.presentation.ui.theme.NewsMVVMTheme
 import com.evanemran.newsmvvm.presentation.viewmodel.NewsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.runtime.remember
+import com.evanemran.newsmvvm.presentation.ExpandableSearchView
+import com.evanemran.newsmvvm.presentation.ShimmerListItem
+import com.evanemran.newsmvvm.presentation.utils.LayoutType
 import com.evanemran.newsmvvm.presentation.utils.getCategories
 import kotlin.random.Random
 
@@ -59,17 +64,20 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.loadNewsData("general")
+        viewModel.loadNewsData(Category.GENERAL.name)
 
         setContent {
             NewsMVVMTheme {
                 val selectedButtonState = remember {
-                    mutableStateOf("general")
+                    mutableStateOf(Category.GENERAL.name)
                 }
+
+                window.statusBarColor = getColor(R.color.white)
 
                 fun onButtonClick(value: String) {
                     selectedButtonState.value = value
                     viewModel.loadNewsData(value)
+
                 }
 
                 Scaffold(
@@ -81,40 +89,84 @@ class MainActivity : ComponentActivity() {
                                 .padding(top = 64.dp)
                                 .background(Color.White)
                         ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.White),
-                                verticalArrangement = Arrangement.Top,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                selectedButtonState.value.let {
+                            if(!viewModel.state.isLoading && viewModel.state.newsInfo?.articles?.isNotEmpty() == true) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.White),
+                                    verticalArrangement = Arrangement.Top,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    selectedButtonState.value.let {
+                                        LazyRow(modifier = Modifier.padding(8.dp) ,content = {
+                                            items(getCategories()) { category->
+                                                FilterButton(category, selectedButtonState.value, onClick = ::onButtonClick)
+                                            }
+                                        })
+                                        LazyColumn(content = {
+                                            viewModel.state.newsInfo?.articles?.let {
+                                                items(it.size) { newsData->
+//                                                    val random: Int = Random.nextInt(2) + 1
+                                                    val random: Int = if(newsData%3==0) 1 else 2
+                                                    when(random) {
+                                                        1-> {
+                                                            NewsItem(article = it[newsData])
+//                                                            ShimmerListItem(
+//                                                                isLoading = viewModel.state.isLoading,
+//                                                                contentAfterLoading = {
+//                                                                    NewsItemInLine(article = it[newsData])
+//                                                                },
+//                                                                modifier = Modifier
+//                                                                    .fillMaxWidth()
+//                                                                    .padding(16.dp)
+//                                                            )
+                                                        }
+                                                        2-> {
+                                                            NewsItemInLine(article = it[newsData])
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        })
+                                    }
+                                }
+                            }
+                            if(viewModel.state.isLoading) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.White),
+                                    verticalArrangement = Arrangement.Top,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
                                     LazyRow(modifier = Modifier.padding(8.dp) ,content = {
                                         items(getCategories()) { category->
                                             FilterButton(category, selectedButtonState.value, onClick = ::onButtonClick)
                                         }
                                     })
-                                    LazyColumn(content = {
-                                        viewModel.state.newsInfo?.articles?.let {
-                                            items(it.size) { newsData->
-                                                val random: Int = Random.nextInt(2) + 1
-                                                when(random) {
-                                                    1-> {
-                                                        NewsItem(article = it[newsData])
-                                                    }
-                                                    2-> {
-                                                        NewsItemInLine(article = it[newsData])
-                                                    }
-                                                }
-                                            }
+                                    LazyColumn(
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                        items(20) { index->
+                                            val type: LayoutType = if(index%3==0) LayoutType.LARGE else LayoutType.LINEAR
+                                            ShimmerListItem(
+                                                isLoading = true,
+                                                type = type,
+                                                contentAfterLoading = {
+                                                    Spacer(modifier = Modifier.width(10.dp))
+                                                },
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(8.dp)
+                                            )
                                         }
-                                    })
+                                    }
+
+//                                CircularProgressIndicator(
+//                                    modifier = Modifier.align(Alignment.Center),
+//                                    color = Color.Red
+//                                )
                                 }
-                            }
-                            if(viewModel.state.isLoading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.align(Alignment.Center)
-                                )
                             }
                             viewModel.state.error?.let { error ->
                                 Text(
@@ -174,6 +226,14 @@ fun AppBar() {
                     contentDescription = ""
                 )
             }
+
+            /*ExpandableSearchView(
+                searchDisplay = "Search",
+                onSearchDisplayChanged = {},
+                expandedInitially = true,
+                onSearchDisplayClosed = {}
+
+            )*/
         },
         navigationIcon = {
             IconButton(

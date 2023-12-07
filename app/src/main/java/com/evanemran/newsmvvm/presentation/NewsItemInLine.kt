@@ -1,6 +1,10 @@
 package com.evanemran.newsmvvm.presentation
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,11 +42,16 @@ import com.evanemran.newsmvvm.domain.news.Articles
 
 @Composable
 fun NewsItemInLine(
+    context: Context,
     article: Articles
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(article.url))
+                context.startActivity(intent)
+            }
             .padding(8.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White,

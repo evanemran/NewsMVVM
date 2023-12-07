@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -54,8 +55,11 @@ fun ShimmerListItem(
                 LayoutType.LINEAR -> {
                     ShimmerInLine(modifier = modifier)
                 }
+                LayoutType.OVERLAY -> {
+                    ShimmerOverlay(modifier = modifier)
+                }
                 LayoutType.GRID -> {
-                    ShimmerInLine(modifier = modifier)
+                    ShimmerOverlay(modifier = modifier)
                 }
             }
         }
@@ -170,7 +174,6 @@ private fun ShimmerLarge(modifier: Modifier) {
             .height(14.dp)
             .clip(
                 RoundedCornerShape(8.dp))
-            .padding(2.dp)
             .shimmerEffect()
         )
         Spacer(modifier = Modifier.height(4.dp))
@@ -179,7 +182,6 @@ private fun ShimmerLarge(modifier: Modifier) {
             .height(14.dp)
             .clip(
                 RoundedCornerShape(8.dp))
-            .padding(2.dp)
             .shimmerEffect()
         )
         Spacer(modifier = Modifier.height(4.dp))
@@ -188,7 +190,6 @@ private fun ShimmerLarge(modifier: Modifier) {
             .height(14.dp)
             .clip(
                 RoundedCornerShape(8.dp))
-            .padding(2.dp)
             .shimmerEffect()
         )
         Spacer(modifier = Modifier.height(4.dp))
@@ -197,7 +198,22 @@ private fun ShimmerLarge(modifier: Modifier) {
             .height(14.dp)
             .clip(
                 RoundedCornerShape(8.dp))
-            .padding(2.dp)
+            .shimmerEffect()
+        )
+    }
+}
+
+@Composable
+private fun ShimmerOverlay(modifier: Modifier) {
+    Column(
+        modifier = modifier,
+    )
+    {
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(1f/1f)
+            .clip(
+                RoundedCornerShape(8.dp))
             .shimmerEffect()
         )
     }

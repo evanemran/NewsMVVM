@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -47,22 +48,24 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.evanemran.newsmvvm.R
 import com.evanemran.newsmvvm.domain.news.Articles
+import com.evanemran.newsmvvm.presentation.ui.theme.transparentBlack
+import com.evanemran.newsmvvm.presentation.ui.theme.transparentWhite
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun NewsItem(
+fun NewsItemOverlay(
     context: Context,
     article: Articles
 ) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
+            .padding(all = 8.dp)
             .clickable {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(article.url))
                 context.startActivity(intent)
             }
-            .padding(8.dp),
+            .fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = Color.White,
         ),
@@ -71,110 +74,43 @@ fun NewsItem(
             defaultElevation = 10.dp,
         ),
     ) {
-        Column(
-            modifier = Modifier
-                .padding(8.dp)
-                .background(Color.White)
-        ) {
-            Text(
-                modifier = Modifier
-                    .padding(vertical = 0.dp),
-                text = article.title,
-                color = Color.Black,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Row() {
-                FooterIcon(Icons.Outlined.DateRange)
-                Spacer(modifier = Modifier.width(4.dp))
+        Box {
+            ImageFromUrlOverlay(article.urlToImage.toString())
+            Column(
+                modifier = Modifier.align(Alignment.BottomCenter)
+                    .background(transparentBlack)
+                    .padding(0.dp),
+            ) {
                 Text(
+                    text = article.title,
                     modifier = Modifier
-                        .padding(0.dp),
-                    text = "Published  ${article.publishedAt}",
-                    color = Color.DarkGray,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Normal
+                        .background(transparentBlack)
+                        .padding(8.dp),
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = article.publishedAt,
+                    modifier = Modifier
+                        .background(transparentBlack)
+                        .padding(8.dp),
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Normal,
                 )
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            ImageFromUrl(article.urlToImage.toString())
-            BlogFooter(author = article.author ?: "N/A", source = article.source ?: "N/A")
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = article.description ?: "N/A", color = Color.Black, fontSize = 14.sp)
         }
     }
 }
 
-@Composable
-fun BlogFooter(author: String, source: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Box(
-            modifier = Modifier
-                .weight(1f)
-        ) {
-            Row() {
-                FooterIcon(Icons.Outlined.Person)
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    modifier = Modifier
-                        .padding(0.dp),
-                    text = "Author: $author",
-                    color = Color.DarkGray,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Normal
-                )
-            }
-        }
-        
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Row(
-            modifier = Modifier
-                .weight(1f)
-        ) {
-            Row() {
-                FooterIcon(Icons.Outlined.Info)
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    modifier = Modifier
-                        .padding(0.dp),
-                    text = "Source: $source",
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = Color.DarkGray,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Normal
-                )
-            }
-        }
-    }
-
-}
 
 @Composable
-fun FooterIcon(icon: ImageVector) {
-    Icon(
-        icon,
-        tint = Color.DarkGray,
-        modifier = Modifier.size(20.dp),
-        contentDescription = null
-    )
-}
-
-@Composable
-fun ImageFromUrl(imageUrl: String) {
+fun ImageFromUrlOverlay(imageUrl: String) {
     AsyncImage(
         modifier = Modifier
             .fillMaxWidth()
-            .height(200.dp),
+            .aspectRatio(1f/1f),
         model = imageUrl,
         contentScale = ContentScale.Crop,
         placeholder = painterResource(id = R.drawable.ic_launcher_background),

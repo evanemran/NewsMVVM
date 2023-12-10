@@ -4,20 +4,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -25,22 +22,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.Build
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.rounded.AccountCircle
-import androidx.compose.material.icons.rounded.Build
-import androidx.compose.material.icons.rounded.Home
-import androidx.compose.material.icons.rounded.Menu
+import androidx.compose.material.icons.outlined.List
+import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material3.AlertDialogDefaults.containerColor
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardElevation
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -58,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -71,29 +57,29 @@ import com.evanemran.newsmvvm.presentation.viewmodel.NewsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.window.Dialog
-import com.evanemran.newsmvvm.presentation.ExpandableSearchView
 import com.evanemran.newsmvvm.presentation.ShimmerListItem
 import com.evanemran.newsmvvm.presentation.utils.LayoutType
 import com.evanemran.newsmvvm.presentation.utils.getCategories
-import kotlin.random.Random
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemColors
-import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarColors
+import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.toUpperCase
+import androidx.compose.ui.text.style.TextDecoration
 import coil.compose.AsyncImage
 import com.evanemran.newsmvvm.presentation.NewsItemOverlay
-import com.evanemran.newsmvvm.presentation.drawer.DrawerItem
 import com.evanemran.newsmvvm.presentation.ui.theme.drawerColors
+import com.evanemran.newsmvvm.presentation.utils.PopupSources
 import com.evanemran.newsmvvm.presentation.utils.getCountries
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -107,20 +93,45 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.loadNewsData(Category.GENERAL.name)
+        viewModel.loadNewsData(Category.GENERAL.name, "us", "N/A", "")
 
         setContent {
             NewsMVVMTheme {
                 val selectedButtonState = remember {
                     mutableStateOf(Category.GENERAL.name)
                 }
+                val selectedCountryState = remember {
+                    mutableStateOf("us")
+                }
+                val showSourceDialogState = remember { mutableStateOf(false) }
+
+                val selectedSourceState = remember {
+                    mutableStateOf("N/A")
+                }
+
+                val searchQueryState = remember {
+                    mutableStateOf("")
+                }
+                val searchActiveState = remember {
+                    mutableStateOf(false)
+                }
 
                 window.statusBarColor = getColor(R.color.white)
 
                 fun onButtonClick(value: String) {
                     selectedButtonState.value = value
-                    viewModel.loadNewsData(value)
+                    viewModel.loadNewsData(value, selectedCountryState.value, "N/A", searchQueryState.value)
 
+                }
+
+                if (showSourceDialogState.value) {
+                    PopupSources(showDialog = showSourceDialogState.value, selectedCategory = selectedButtonState.value, selectedCountry = selectedCountryState.value, selectedSourceState = selectedSourceState,
+                        onDismiss = {newSource ->
+                            if(newSource!="N/A") viewModel.loadNewsData(selectedButtonState.value, selectedCountryState.value, selectedSourceState.value, "")
+                            selectedSourceState.value = newSource
+                            showSourceDialogState.value = false
+
+                        })
                 }
 
                 Surface {
@@ -129,17 +140,27 @@ class MainActivity : ComponentActivity() {
                     var selectedItemIndex by rememberSaveable {
                         mutableIntStateOf(0)
                     }
+                    val configuration = LocalConfiguration.current
                     ModalNavigationDrawer(
                         drawerContent = {
                             ModalDrawerSheet(
                                 modifier = Modifier
-                                    .background(Color.White),
+                                    .background(Color.White)
+                                    .fillMaxWidth(0.7f),
                                 drawerContainerColor = Color.White,
                             ) {
                                 Column(
                                     modifier = Modifier
                                         .padding(16.dp)
                                 ) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.news_mvvm),
+                                        contentDescription = "",
+                                        modifier = Modifier
+                                            .padding(0.dp)
+                                            .width(100.dp)
+                                            .height(100.dp)
+                                    )
                                     Text(
                                         text = "NewsMVVM",
                                         color = Color.Red,
@@ -154,33 +175,15 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
-                                getCountries().forEachIndexed { index, item ->
-                                    NavigationDrawerItem(
-                                        modifier = Modifier.padding(
-                                            top = 8.dp,
-                                            start = 8.dp,
-                                            end = 8.dp
-                                        ),
-                                        label = {
-                                            Text(text = item.name)
-                                        },
-                                        colors = drawerColors(),
-                                        selected = index == selectedItemIndex,
-                                        shape = RoundedCornerShape(corner = CornerSize(8.dp)),
-                                        onClick = {
-                                            selectedItemIndex = index
-                                            scope.launch {
-                                                drawerState.close()
-                                            }
-                                        },
-                                        icon = {
-                                            ImageFlag(item.code)
-                                        },
-                                        badge = {
-                                            Text(text = item.code.uppercase())
-                                        },
-                                    )
-                                }
+                                Text(
+                                    text = "Choose a Country",
+                                    modifier = Modifier
+                                        .padding(start = 16.dp),
+                                    color = Color.Red,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    textDecoration = TextDecoration.Underline
+                                )
                                 LazyColumn(
                                     userScrollEnabled = true,
                                     content = {
@@ -193,22 +196,25 @@ class MainActivity : ComponentActivity() {
                                                     end = 8.dp
                                                 ),
                                                 label = {
-                                                    Text(text = it[item].name)
+                                                    Text(text = it[item].name, maxLines = 1)
                                                 },
                                                 colors = drawerColors(),
-                                                selected = item == selectedItemIndex,
+                                                selected = getCountries()[item].code == selectedCountryState.value,
                                                 shape = RoundedCornerShape(corner = CornerSize(8.dp)),
                                                 onClick = {
+                                                    selectedCountryState.value = getCountries()[item].code
                                                     selectedItemIndex = item
                                                     scope.launch {
                                                         drawerState.close()
+                                                        searchQueryState.value = ""
+                                                        viewModel.loadNewsData(selectedButtonState.value, selectedCountryState.value, "N/A", "")
                                                     }
                                                 },
                                                 icon = {
                                                     ImageFlag(it[item].code.uppercase())
                                                 },
                                                 badge = {
-                                                    Text(text = it[item].code.uppercase())
+                                                    Text(text = it[item].code.uppercase(), fontSize = 12.sp)
                                                 },
                                             )
                                         }
@@ -219,7 +225,7 @@ class MainActivity : ComponentActivity() {
                         drawerState = drawerState
                     ) {
                         Scaffold(
-                            topBar = { AppBar(drawerState, scope) },
+                            topBar = { AppBar(drawerState, scope, selectedCountryState, showSourceDialogState) },
                             content = {
                                 it
                                 Box(
@@ -237,6 +243,53 @@ class MainActivity : ComponentActivity() {
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
                                             selectedButtonState.value.let {
+                                                SearchBar(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(start = 10.dp, end = 10.dp),
+                                                    colors = SearchBarDefaults.colors(
+                                                        containerColor = Color.White,
+                                                        dividerColor = Color.White
+                                                    ),
+                                                    query = searchQueryState.value,
+                                                    onQueryChange = {
+                                                                    searchQueryState.value = it
+                                                    },
+                                                    onSearch = {
+                                                               searchActiveState.value = false
+                                                        //other params kept empty to get maximum results
+                                                        viewModel.loadNewsData("", "", "N/A", searchQueryState.value)
+                                                    },
+                                                    active = searchActiveState.value,
+                                                    onActiveChange = {
+                                                        searchActiveState.value = it
+                                                    },
+                                                    placeholder = {
+                                                        Text(text = "Search")
+                                                    },
+                                                    leadingIcon = {
+                                                        Icon(imageVector = Icons.Rounded.Search, contentDescription = "")
+                                                    },
+                                                    trailingIcon = {
+                                                        if(searchActiveState.value || searchQueryState.value.isNotEmpty()) {
+                                                            Icon(
+                                                                modifier = Modifier
+                                                                    .clickable {
+                                                                               if(searchQueryState.value.isNotEmpty()) {
+                                                                                   searchQueryState.value = ""
+                                                                               }
+                                                                        else {
+                                                                            searchActiveState.value = false
+                                                                        }
+                                                                    },
+                                                                imageVector = Icons.Rounded.Clear,
+                                                                contentDescription = "Clear"
+                                                            )
+                                                        }
+                                                    }
+                                                ) {
+
+                                                }
                                                 LazyRow(
                                                     modifier = Modifier.padding(8.dp),
                                                     content = {
@@ -326,11 +379,16 @@ class MainActivity : ComponentActivity() {
                                     }
                                     viewModel.state.error?.let { error ->
                                         Text(
-                                            text = error,
+                                            text = if (searchQueryState.value.isEmpty()) error else "No Data Found For ${searchQueryState.value}!",
                                             color = Color.Red,
                                             modifier = Modifier.align(Alignment.Center),
                                             textAlign = TextAlign.Center,
                                         )
+                                        TextButton(
+                                            onClick = { /*TODO*/ })
+                                        {
+                                            Text(text = "Reload!")
+                                        }
                                     }
                                 }
                             }
@@ -411,9 +469,18 @@ fun FilterButton(model: Category, selectedButtonState: String, onClick: (String)
     }
 }
 
+fun onSourceDismiss() {
+
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppBar(drawerState: DrawerState, scope: CoroutineScope) {
+fun AppBar(
+    drawerState: DrawerState,
+    scope: CoroutineScope,
+    selectedCountryState: MutableState<String>,
+    showSourceDialogState: MutableState<Boolean>
+) {
     TopAppBar(
         title = {
             Text(
@@ -427,11 +494,11 @@ fun AppBar(drawerState: DrawerState, scope: CoroutineScope) {
         actions = {
             IconButton(
                 onClick = {
-
+                    showSourceDialogState.value = true
                 },
             ) {
                 Icon(
-                    Icons.Outlined.Settings,
+                    Icons.Outlined.List,
                     tint = Color.Black,
                     contentDescription = ""
                 )
@@ -466,11 +533,7 @@ fun AppBar(drawerState: DrawerState, scope: CoroutineScope) {
                     }
                 },
             ) {
-                Icon(
-                    Icons.Rounded.Menu,
-                    tint = Color.Red,
-                    contentDescription = ""
-                )
+                ImageFlag(selectedCountryState.value)
             }
         },
     )

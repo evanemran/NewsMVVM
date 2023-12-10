@@ -29,10 +29,10 @@ fun drawerColors(): MyDrawerColors {
 class MyDrawerColors() :  NavigationDrawerItemColors{
 
     var selectedContainerColor: Color = drawerRedLight
-    var unselectedContainerColor: Color = drawerWhite
+    var unselectedContainerColor: Color = Color.White
     var selectedIconColor: Color = drawerWhite
     var unselectedIconColor: Color = black
-    var selectedTextColor: Color = drawerWhite
+    var selectedTextColor: Color = Color.White
     var unselectedTextColor: Color = black
     var selectedBadgeColor: Color = selectedTextColor
     var unselectedBadgeColor: Color = unselectedTextColor

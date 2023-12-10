@@ -10,6 +10,13 @@ interface NewsApi {
     suspend fun getHeadlines(
         @Query("country") country: String,
         @Query("category") category: String,
+        @Query("q") query: String,
+        @Query("apiKey") apiKey: String,
+    ): NewsDataDto
+
+    @GET("v2/top-headlines")
+    suspend fun getHeadlinesBySource(
+        @Query("sources") sources: String,
         @Query("apiKey") apiKey: String,
     ): NewsDataDto
 }

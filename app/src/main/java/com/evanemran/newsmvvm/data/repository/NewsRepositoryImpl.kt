@@ -13,12 +13,27 @@ class NewsRepositoryImpl @Inject constructor(
     override suspend fun getNewsData(
         country: String,
         category: String,
+        query: String,
         apiKey: String
     ): Resource<NewsData> {
         return try {
             Resource.Success(
                 data =api.getHeadlines(
-                    country = country, category = category, apiKey = apiKey
+                    country = country, category = category, query = query, apiKey = apiKey
+                ).toNewsData()
+            )
+        }
+        catch (e: Exception) {
+            e.printStackTrace()
+            Resource.Error(e.message ?: "An unknown error occurred!")
+        }
+    }
+
+    override suspend fun getNewsDataBySource(source: String, apiKey: String): Resource<NewsData> {
+        return try {
+            Resource.Success(
+                data =api.getHeadlinesBySource(
+                    sources = source, apiKey = apiKey
                 ).toNewsData()
             )
         }

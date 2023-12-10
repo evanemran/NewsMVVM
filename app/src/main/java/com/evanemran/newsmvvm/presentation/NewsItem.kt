@@ -59,8 +59,8 @@ fun NewsItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-//                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(article.url))
-//                context.startActivity(intent)
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(article.url))
+                context.startActivity(intent)
             }
             .padding(8.dp),
         colors = CardDefaults.cardColors(

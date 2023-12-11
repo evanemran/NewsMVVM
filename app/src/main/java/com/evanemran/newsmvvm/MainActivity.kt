@@ -70,6 +70,8 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarColors
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDateRangePickerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -80,7 +82,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import coil.compose.AsyncImage
 import com.evanemran.newsmvvm.presentation.NewsItemOverlay
 import com.evanemran.newsmvvm.presentation.ui.theme.drawerColors
+import com.evanemran.newsmvvm.presentation.utils.PopupDatePicker
 import com.evanemran.newsmvvm.presentation.utils.PopupSources
+import com.evanemran.newsmvvm.presentation.utils.SampleDatePickerView
 import com.evanemran.newsmvvm.presentation.utils.getCountries
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -88,7 +92,6 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel: NewsViewModel by viewModels()
-//    private var selectedButtonState: MutableState<String> = mutableStateOf("business")
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,6 +108,10 @@ class MainActivity : ComponentActivity() {
                     mutableStateOf("us")
                 }
                 val showSourceDialogState = remember { mutableStateOf(false) }
+
+                val datePickerState = rememberDateRangePickerState()
+                val showDatePickerDialogState = remember { mutableStateOf(false) }
+                val bottomSheetState = rememberModalBottomSheetState()
 
                 val selectedSourceState = remember {
                     mutableStateOf("N/A")
@@ -132,6 +139,15 @@ class MainActivity : ComponentActivity() {
                             selectedSourceState.value = newSource
                             showSourceDialogState.value = false
 
+                        })
+                }
+                if (showDatePickerDialogState.value) {
+                    PopupDatePicker(
+                        onDateSelected = {
+                                         //call service with params
+                        },
+                        onDismiss = {
+                            showDatePickerDialogState.value = false
                         })
                 }
 
@@ -226,7 +242,7 @@ class MainActivity : ComponentActivity() {
                         drawerState = drawerState
                     ) {
                         Scaffold(
-                            topBar = { AppBar(drawerState, scope, selectedCountryState, showSourceDialogState) },
+                            topBar = { AppBar(drawerState, scope, selectedCountryState, showSourceDialogState, showDatePickerDialogState) },
                             content = {
                                 it
                                 Box(
@@ -287,10 +303,9 @@ class MainActivity : ComponentActivity() {
                                                                 contentDescription = "Clear"
                                                             )
                                                         }
-                                                    }
-                                                ) {
-
-                                                }
+                                                    },
+                                                    content = {}
+                                                )
                                                 LazyRow(
                                                     modifier = Modifier.padding(8.dp),
                                                     content = {
@@ -480,7 +495,8 @@ fun AppBar(
     drawerState: DrawerState,
     scope: CoroutineScope,
     selectedCountryState: MutableState<String>,
-    showSourceDialogState: MutableState<Boolean>
+    showSourceDialogState: MutableState<Boolean>,
+    showDatePickerDialogState: MutableState<Boolean>
 ) {
     TopAppBar(
         title = {
@@ -507,7 +523,7 @@ fun AppBar(
 
             IconButton(
                 onClick = {
-
+                    showDatePickerDialogState.value = true
                 },
             ) {
                 Icon(

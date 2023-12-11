@@ -99,6 +99,15 @@ fun NewsItemOverlay(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Normal,
                 )
+                Text(
+                    text = article.source,
+                    modifier = Modifier
+                        .background(transparentBlack)
+                        .padding(8.dp),
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Normal,
+                )
             }
         }
     }

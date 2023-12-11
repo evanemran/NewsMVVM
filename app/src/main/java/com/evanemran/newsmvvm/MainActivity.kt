@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -510,7 +511,7 @@ fun AppBar(
                 },
             ) {
                 Icon(
-                    Icons.Rounded.Search,
+                    Icons.Rounded.DateRange,
                     tint = Color.Black,
                     contentDescription = ""
                 )

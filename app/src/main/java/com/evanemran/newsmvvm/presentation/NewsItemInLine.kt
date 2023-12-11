@@ -92,6 +92,19 @@ fun NewsItemInLine(
                         fontWeight = FontWeight.Normal
                     )
                 }
+                Spacer(modifier = Modifier.height(4.dp))
+                Row() {
+                    FooterIcon(Icons.Outlined.Info)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        modifier = Modifier
+                            .padding(0.dp),
+                        text = "Source  ${article.source}",
+                        color = Color.DarkGray,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Normal
+                    )
+                }
             }
         }
     }

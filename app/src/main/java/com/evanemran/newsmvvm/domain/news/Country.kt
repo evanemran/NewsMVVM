@@ -1,4 +1,4 @@
-package com.evanemran.newsmvvm.presentation
+package com.evanemran.newsmvvm.domain.news
 
 data class Country(
     var name: String,

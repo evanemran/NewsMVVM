@@ -28,7 +28,6 @@ import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -58,16 +57,14 @@ import com.evanemran.newsmvvm.presentation.viewmodel.NewsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.evanemran.newsmvvm.presentation.ShimmerListItem
+import com.evanemran.newsmvvm.presentation.utils.ShimmerListItem
 import com.evanemran.newsmvvm.presentation.utils.LayoutType
 import com.evanemran.newsmvvm.presentation.utils.getCategories
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarColors
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDateRangePickerState
@@ -82,9 +79,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import coil.compose.AsyncImage
 import com.evanemran.newsmvvm.presentation.NewsItemOverlay
 import com.evanemran.newsmvvm.presentation.ui.theme.drawerColors
+import com.evanemran.newsmvvm.presentation.ui.theme.drawerWhite
 import com.evanemran.newsmvvm.presentation.utils.PopupDatePicker
 import com.evanemran.newsmvvm.presentation.utils.PopupSources
-import com.evanemran.newsmvvm.presentation.utils.SampleDatePickerView
 import com.evanemran.newsmvvm.presentation.utils.getCountries
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -251,7 +248,6 @@ class MainActivity : ComponentActivity() {
                                         .padding(top = 64.dp)
                                         .background(Color.White)
                                 ) {
-                                    if (!viewModel.state.isLoading && viewModel.state.newsInfo?.articles?.isNotEmpty() == true) {
                                         Column(
                                             modifier = Modifier
                                                 .fillMaxSize()
@@ -259,64 +255,64 @@ class MainActivity : ComponentActivity() {
                                             verticalArrangement = Arrangement.Top,
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
-                                            selectedButtonState.value.let {
-                                                SearchBar(
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .padding(start = 10.dp, end = 10.dp),
-                                                    colors = SearchBarDefaults.colors(
-                                                        containerColor = Color.White,
-                                                        dividerColor = Color.White
-                                                    ),
-                                                    query = searchQueryState.value,
-                                                    onQueryChange = {
-                                                                    searchQueryState.value = it
-                                                    },
-                                                    onSearch = {
-                                                               searchActiveState.value = false
-                                                        //other params kept empty to get maximum results
-                                                        viewModel.loadNewsData("", "", "N/A", searchQueryState.value)
-                                                    },
-                                                    active = searchActiveState.value,
-                                                    onActiveChange = {
-                                                        searchActiveState.value = it
-                                                    },
-                                                    placeholder = {
-                                                        Text(text = "Search")
-                                                    },
-                                                    leadingIcon = {
-                                                        Icon(imageVector = Icons.Rounded.Search, contentDescription = "")
-                                                    },
-                                                    trailingIcon = {
-                                                        if(searchActiveState.value || searchQueryState.value.isNotEmpty()) {
-                                                            Icon(
-                                                                modifier = Modifier
-                                                                    .clickable {
-                                                                               if(searchQueryState.value.isNotEmpty()) {
-                                                                                   searchQueryState.value = ""
-                                                                               }
-                                                                        else {
-                                                                            searchActiveState.value = false
-                                                                        }
-                                                                    },
-                                                                imageVector = Icons.Rounded.Clear,
-                                                                contentDescription = "Clear"
-                                                            )
-                                                        }
-                                                    },
-                                                    content = {}
-                                                )
-                                                LazyRow(
-                                                    modifier = Modifier.padding(8.dp),
-                                                    content = {
-                                                        items(getCategories()) { category ->
-                                                            FilterButton(
-                                                                category,
-                                                                selectedButtonState.value,
-                                                                onClick = ::onButtonClick
-                                                            )
-                                                        }
-                                                    })
+                                            SearchBar(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(start = 10.dp, end = 10.dp),
+                                                colors = SearchBarDefaults.colors(
+                                                    containerColor = Color.White,
+                                                    dividerColor = Color.White
+                                                ),
+                                                query = searchQueryState.value,
+                                                onQueryChange = {
+                                                    searchQueryState.value = it
+                                                },
+                                                onSearch = {
+                                                    searchActiveState.value = false
+                                                    //other params kept empty to get maximum results
+                                                    viewModel.loadNewsData("", "", "N/A", searchQueryState.value)
+                                                },
+                                                active = searchActiveState.value,
+                                                onActiveChange = {
+                                                    searchActiveState.value = it
+                                                },
+                                                placeholder = {
+                                                    Text(text = "Search")
+                                                },
+                                                leadingIcon = {
+                                                    Icon(imageVector = Icons.Rounded.Search, contentDescription = "")
+                                                },
+                                                trailingIcon = {
+                                                    if(searchActiveState.value || searchQueryState.value.isNotEmpty()) {
+                                                        Icon(
+                                                            modifier = Modifier
+                                                                .clickable {
+                                                                    if(searchQueryState.value.isNotEmpty()) {
+                                                                        searchQueryState.value = ""
+                                                                    }
+                                                                    else {
+                                                                        searchActiveState.value = false
+                                                                    }
+                                                                },
+                                                            imageVector = Icons.Rounded.Clear,
+                                                            contentDescription = "Clear"
+                                                        )
+                                                    }
+                                                },
+                                                content = {}
+                                            )
+                                            LazyRow(
+                                                modifier = Modifier.padding(8.dp),
+                                                content = {
+                                                    items(getCategories()) { category ->
+                                                        FilterButton(
+                                                            category,
+                                                            selectedButtonState.value,
+                                                            onClick = ::onButtonClick
+                                                        )
+                                                    }
+                                                })
+                                            if (!viewModel.state.isLoading && viewModel.state.newsInfo?.articles?.isNotEmpty() == true) {
                                                 LazyColumn(content = {
                                                     viewModel.state.newsInfo?.articles?.let {
                                                         items(it.size) { newsData ->
@@ -349,63 +345,58 @@ class MainActivity : ComponentActivity() {
                                                     }
                                                 })
                                             }
-                                        }
-                                    }
-                                    if (viewModel.state.isLoading) {
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .background(Color.White),
-                                            verticalArrangement = Arrangement.Top,
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            LazyRow(modifier = Modifier.padding(8.dp), content = {
-                                                items(getCategories()) { category ->
-                                                    FilterButton(
-                                                        category,
-                                                        selectedButtonState.value,
-                                                        onClick = ::onButtonClick
-                                                    )
-                                                }
-                                            })
-                                            LazyColumn(
-                                                modifier = Modifier.fillMaxSize()
-                                            ) {
-                                                items(20) { index ->
-                                                    val type: LayoutType =
-                                                        if (index % 3 == 0) LayoutType.LARGE else if (index % 4 == 0) LayoutType.OVERLAY else LayoutType.LINEAR
-                                                    ShimmerListItem(
-                                                        isLoading = true,
-                                                        type = type,
-                                                        contentAfterLoading = {
-                                                            Spacer(modifier = Modifier.width(10.dp))
-                                                        },
-                                                        modifier = Modifier
-                                                            .fillMaxWidth()
-                                                            .padding(8.dp)
-                                                    )
+                                            if (viewModel.state.isLoading) {
+                                                Column(
+                                                    modifier = Modifier
+                                                        .fillMaxSize()
+                                                        .background(Color.White),
+                                                    verticalArrangement = Arrangement.Top,
+                                                    horizontalAlignment = Alignment.CenterHorizontally
+                                                ) {
+                                                    LazyColumn(
+                                                        modifier = Modifier.fillMaxSize()
+                                                    ) {
+                                                        items(20) { index ->
+                                                            val type: LayoutType =
+                                                                if (index % 3 == 0) LayoutType.LARGE else if (index % 4 == 0) LayoutType.OVERLAY else LayoutType.LINEAR
+                                                            ShimmerListItem(
+                                                                isLoading = true,
+                                                                type = type,
+                                                                contentAfterLoading = {
+                                                                    Spacer(modifier = Modifier.width(10.dp))
+                                                                },
+                                                                modifier = Modifier
+                                                                    .fillMaxWidth()
+                                                                    .padding(8.dp)
+                                                            )
+                                                        }
+                                                    }
                                                 }
                                             }
-
-//                                CircularProgressIndicator(
-//                                    modifier = Modifier.align(Alignment.Center),
-//                                    color = Color.Red
-//                                )
+                                            viewModel.state.error?.let { error ->
+                                                Column(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    verticalArrangement = Arrangement.Center,
+                                                    horizontalAlignment = Alignment.CenterHorizontally
+                                                ) {
+                                                    Text(
+                                                        modifier = Modifier
+                                                            .padding(16.dp),
+                                                        text = if (searchQueryState.value.isEmpty()) error else "No Data Found For ${searchQueryState.value}!",
+                                                        color = Color.DarkGray,
+                                                        textAlign = TextAlign.Center,
+                                                    )
+                                                    TextButton(
+                                                        colors = ButtonDefaults.buttonColors(
+                                                            containerColor = drawerWhite
+                                                        ),
+                                                        onClick = { /*TODO*/ })
+                                                    {
+                                                        Text(text = "Retry", color = Color.Red)
+                                                    }
+                                                }
+                                            }
                                         }
-                                    }
-                                    viewModel.state.error?.let { error ->
-                                        Text(
-                                            text = if (searchQueryState.value.isEmpty()) error else "No Data Found For ${searchQueryState.value}!",
-                                            color = Color.Red,
-                                            modifier = Modifier.align(Alignment.Center),
-                                            textAlign = TextAlign.Center,
-                                        )
-                                        TextButton(
-                                            onClick = { /*TODO*/ })
-                                        {
-                                            Text(text = "Reload!")
-                                        }
-                                    }
                                 }
                             }
                         )
@@ -432,34 +423,6 @@ fun ImageFlag(imageUrl: String) {
 }
 
 @Composable
-fun ExpandableCard(header: Unit) {
-
-    var expanded by remember { mutableStateOf(false) }
-
-    Card(
-        shape = RoundedCornerShape(8.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .clickable {
-                expanded = !expanded
-            }
-    ) {
-        Column(
-        ) {
-            header
-            if (expanded) {
-                Text(
-                    text = "Content Sample for Display on Expansion of Card",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(8.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
 fun FilterButton(model: Category, selectedButtonState: String, onClick: (String) -> Unit) {
     var color: Color = Color.DarkGray
     if (selectedButtonState == model.name) {
@@ -483,10 +446,6 @@ fun FilterButton(model: Category, selectedButtonState: String, onClick: (String)
             color = Color.White,
         )
     }
-}
-
-fun onSourceDismiss() {
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -532,15 +491,6 @@ fun AppBar(
                     contentDescription = ""
                 )
             }
-
-            //Need to fix boundaries
-            /*ExpandableSearchView(
-                searchDisplay = "Search",
-                onSearchDisplayChanged = {},
-                expandedInitially = true,
-                onSearchDisplayClosed = {}
-
-            )*/
         },
         navigationIcon = {
             IconButton(

@@ -1,7 +1,7 @@
 package com.evanemran.newsmvvm.presentation.utils
 
 import com.evanemran.newsmvvm.domain.news.Category
-import com.evanemran.newsmvvm.presentation.Country
+import com.evanemran.newsmvvm.domain.news.Country
 
 fun getCategories(): List<Category> {
     return listOf(

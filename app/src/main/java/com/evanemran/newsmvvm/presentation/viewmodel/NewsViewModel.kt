@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.evanemran.newsmvvm.BuildConfig
 import com.evanemran.newsmvvm.domain.repository.NewsRepository
 import com.evanemran.newsmvvm.domain.util.Resource
 import com.evanemran.newsmvvm.presentation.NewsState
@@ -26,8 +27,8 @@ class NewsViewModel @Inject constructor(
                 error = null
             )
 
-            when (val result = if (source == "N/A") newsRepository.getNewsData(country ,category, query, "6600726d91554031a727674028102f84")
-            else newsRepository.getNewsDataBySource(source,"6600726d91554031a727674028102f84")) {
+            when (val result = if (source == "N/A") newsRepository.getNewsData(country ,category, query, BuildConfig.API_KEY)
+            else newsRepository.getNewsDataBySource(source,BuildConfig.API_KEY)) {
                 is Resource.Success -> {
                     state = state.copy(
                         newsInfo = result.data,
